@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fleet Command — Trailer Logistics Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <style>
 :root {
   --bg:#0a0e1a;
@@ -1038,11 +1040,13 @@ function dk(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0
 function pk(k){const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d);}
 function cap(s){return s?s.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():'').join(' '):''}
 function ini(n,a){return ((n||'')[0]+(a||'')[0]).toUpperCase();}
-function busyC(id,key){return (evs[key]||[]).some(e=>e.cId===id);}
-function busyT(id,key){return (evs[key]||[]).some(e=>e.tId===id);}
-function busyR(id,key){return (evs[key]||[]).some(e=>e.rId===id);}
-function anyBusyC(id){return Object.values(evs).flat().some(e=>e.cId===id);}
-function anyBusyV(id,t){return Object.values(evs).flat().some(e=>t==='t'?e.tId===id:e.rId===id);}
+function dayEvsList(key){return Object.values(evs[key]||{});}
+function allEvsList(){return Object.values(evs).flatMap(d=>Object.values(d));}
+function busyC(id,key){return dayEvsList(key).some(e=>e.cId===id);}
+function busyT(id,key){return dayEvsList(key).some(e=>e.tId===id);}
+function busyR(id,key){return dayEvsList(key).some(e=>e.rId===id);}
+function anyBusyC(id){return allEvsList().some(e=>e.cId===id);}
+function anyBusyV(id,t){return allEvsList().some(e=>t==='t'?e.tId===id:e.rId===id);}
 
 // ════════════════════════════════════
 // SIDEBAR
@@ -1155,8 +1159,9 @@ function renderMonth(){
   document.getElementById('cal').innerHTML=`<div style="display:flex;flex-direction:column;height:100%;overflow:hidden">${h}<div style="flex:1;overflow-y:auto">${g}</div></div>${legBar()}`;
 }
 function mCell(key,num,other,tod){
-  const isT=key===tod,dayEvs=evs[key]||[];
+  const isT=key===tod,dayEvs=dayEvsList(key);
   const max=3;
+  const dayEvs=dayEvsList(key);
   let chips=dayEvs.slice(0,max).map(e=>{
     const c2=C.find(x=>x.id===e.cId);
     const lbl=c2?`${cap(c2.n)} ${cap(c2.a).split(' ')[0]}`:OPL[e.op];
@@ -1181,7 +1186,7 @@ function renderWeek(){
     const k=dk(d),isT=k===tod;
     b+=`<div class="dcol${isT?' today':''}" style="${isT?'background:var(--blue-bg)':''}" onclick="openCreate('${k}')">`;
     hrs.forEach(()=>{b+=`<div class="hline"></div>`;});
-    (evs[k]||[]).forEach(e=>{
+    dayEvsList(k).forEach(e=>{
       const[hi2,mi]=(e.hi||'08:00').split(':').map(Number);
       const[hf2,mf]=(e.hf||'18:00').split(':').map(Number);
       const top=(hi2*60+mi)*54/60,ht=Math.max(((hf2*60+mf)-(hi2*60+mi))*54/60,28);
@@ -1203,7 +1208,7 @@ function renderDay(){
   const tod=dk(new Date()),k=dk(cur),isT=k===tod;
   const hrs=Array.from({length:24},(_,i)=>i);
   const nowLineDay=isT?(()=>{const n=new Date();const top=(n.getHours()*60+n.getMinutes())*54/60;return '<div class="now-line" style="top:'+top+'px"></div>';})():'';
-  let blocks=(evs[k]||[]).map(e=>{
+  let blocks=dayEvsList(k).map(e=>{
     const[hi2,mi]=(e.hi||'08:00').split(':').map(Number);
     const[hf2,mf]=(e.hf||'18:00').split(':').map(Number);
     const top=(hi2*60+mi)*54/60,ht=Math.max(((hf2*60+mf)-(hi2*60+mi))*54/60,44);
@@ -1311,19 +1316,21 @@ function saveEv(){
   if(busyC(cSel,crDK)){toast_('Conductor ya tiene asignación ese día','#dc2626');return;}
   if(tId&&busyT(tId,crDK)){toast_('Tracto ya asignado ese día','#dc2626');return;}
   if(rId&&busyR(rId,crDK)){toast_('Rampla ya asignada ese día','#dc2626');return;}
-  if(!evs[crDK])evs[crDK]=[];
-  evs[crDK].push({id:Date.now()+'',cId:cSel,tId,rId,cli,op:opSel,hi,hf,obs});
+  const evId=Date.now()+'';
+  if(!evs[crDK])evs[crDK]={};
+  evs[crDK][evId]={id:evId,cId:cSel,tId,rId,cli,op:opSel,hi,hf,obs};
   close_('ovC');
   const c2=C.find(x=>x.id===cSel);
   toast_(`✓ ${cap(c2.n)} asignado`,'#059669');
   render();
+  if(window._db)window._db.ref('evs').set(evs);
 }
 
 // ════════════════════════════════════
 // DETAIL
 // ════════════════════════════════════
 function showDet(key,evId){
-  const ev=(evs[key]||[]).find(e=>e.id===evId); if(!ev) return;
+  const ev=dayEvsList(key).find(e=>e.id===evId); if(!ev) return;
   detRef={key,evId};
   const c2=C.find(x=>x.id===ev.cId),t2=T.find(x=>x.id===ev.tId),r2=R.find(x=>x.id===ev.rId);
   const d=pk(key);
@@ -1343,8 +1350,9 @@ function showDet(key,evId){
 }
 function delEv(){
   if(!detRef)return;
-  evs[detRef.key]=(evs[detRef.key]||[]).filter(e=>e.id!==detRef.evId);
+  if(evs[detRef.key])delete evs[detRef.key][detRef.evId];
   close_('ovD');toast_('Entrada eliminada','#ea580c');render();
+  if(window._db)window._db.ref('evs').set(evs);
 }
 
 // ════════════════════════════════════
@@ -1362,8 +1370,8 @@ function toast_(msg,col='#059669'){
 }
 
 function updateKPIs(){
-  const busy=new Set(Object.values(evs).flat().map(e=>e.cId)).size;
-  const todEvs=evs[dk(new Date())]||[];
+  const busy=new Set(allEvsList().map(e=>e.cId)).size;
+  const todEvs=dayEvsList(dk(new Date()));
   const free=C.length-busy;
   const now=new Date();
   const warn=C.filter(c=>{const diff=(new Date(c.lic)-now)/864e5;return diff>0&&diff<90;}).length;
@@ -1382,8 +1390,9 @@ function seed(){
   const t=new Date(),y=t.getFullYear(),m=t.getMonth();
   const add=(off,cId,tId,rId,op,cli,hi,hf,obs='')=>{
     const d=new Date(y,m,t.getDate()+off),k=dk(d);
-    if(!evs[k])evs[k]=[];
-    evs[k].push({id:Date.now()+''+Math.random(),cId,tId,rId,cli,op,hi,hf,obs});
+    if(!evs[k])evs[k]={};
+    const eid=Date.now()+''+Math.random();
+    evs[k][eid]={id:eid,cId,tId,rId,cli,op,hi,hf,obs};
   };
   add(0,2,30259,27512,'carga','Walmart Chile','07:00','16:00');
   add(0,3,40138,28092,'descarga','Falabella Retail','09:00','18:00');
@@ -1532,9 +1541,40 @@ function seed(){
 })();
 
 // ════════════════════════════════════
-// INIT
+// INIT — FIREBASE REALTIME SYNC
 // ════════════════════════════════════
-seed();render();
+(function initFirebase(){
+  const app = firebase.initializeApp({
+    apiKey: "AIzaSyCJB1_L44ECrtFT951z7vBiFKdozftHMHQ",
+    authDomain: "planificacion-choferes.firebaseapp.com",
+    projectId: "planificacion-choferes",
+    storageBucket: "planificacion-choferes.firebasestorage.app",
+    messagingSenderId: "18427650463",
+    appId: "1:18427650463:web:d1ea20526bd47cc44c1daa",
+    databaseURL: "https://planificacion-choferes-default-rtdb.firebaseio.com"
+  });
+  const db = firebase.database();
+  window._db = db;
+
+  let firstLoad = true;
+  db.ref('evs').on('value', snapshot => {
+    const data = snapshot.val();
+    if (firstLoad && !data) {
+      // Primera vez: la base está vacía → sembrar datos demo
+      seed();
+      db.ref('evs').set(evs);
+      firstLoad = false;
+      return; // el set() disparará otro onValue con los datos
+    }
+    firstLoad = false;
+    if (data) evs = data;
+    render();
+    updateKPIs();
+  });
+
+  // Render inicial inmediato (calendario vacío mientras carga Firebase)
+  render();
+})();
 </script>
 </body>
 </html>
