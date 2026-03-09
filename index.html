@@ -1161,7 +1161,6 @@ function renderMonth(){
 function mCell(key,num,other,tod){
   const isT=key===tod,dayEvs=dayEvsList(key);
   const max=3;
-  const dayEvs=dayEvsList(key);
   let chips=dayEvs.slice(0,max).map(e=>{
     const c2=C.find(x=>x.id===e.cId);
     const lbl=c2?`${cap(c2.n)} ${cap(c2.a).split(' ')[0]}`:OPL[e.op];
