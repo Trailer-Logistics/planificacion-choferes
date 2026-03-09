@@ -1321,7 +1321,7 @@ function saveEv(){
   const c2=C.find(x=>x.id===cSel);
   toast_(`✓ ${cap(c2.n)} asignado`,'#059669');
   if(window._db){
-    window._db.ref('evs/'+crDK+'/'+evId).set(newEv);
+    window._db.ref('evs2/'+crDK+'/'+evId).set(newEv);
   } else {
     if(!evs[crDK])evs[crDK]={};
     evs[crDK][evId]=newEv;
@@ -1357,7 +1357,7 @@ function delEv(){
   close_('ovD');
   toast_('Entrada eliminada','#ea580c');
   if(window._db){
-    window._db.ref('evs/'+key+'/'+evId).remove();
+    window._db.ref('evs2/'+key+'/'+evId).remove();
   } else {
     if(evs[key])delete evs[key][evId];
     render();
@@ -1400,7 +1400,7 @@ function seed(){
   const add=(off,cId,tId,rId,op,cli,hi,hf,obs='')=>{
     const d=new Date(y,m,t.getDate()+off),k=dk(d);
     if(!evs[k])evs[k]={};
-    const eid=Date.now()+''+Math.random();
+    const eid='e'+Date.now()+Math.floor(Math.random()*1e9);
     evs[k][eid]={id:eid,cId,tId,rId,cli,op,hi,hf,obs};
   };
   add(0,2,30259,27512,'carga','Walmart Chile','07:00','16:00');
@@ -1565,12 +1565,12 @@ function seed(){
   const db = firebase.database();
   window._db = db;
 
-  db.ref('evs').on('value', snapshot => {
+  db.ref('evs2').on('value', snapshot => {
     const data = snapshot.val();
     if (!data) {
       // Base vacía → sembrar datos demo una sola vez
       seed();
-      db.ref('evs').set(evs);
+      db.ref('evs2').set(evs);
       return;
     }
     evs = data;
