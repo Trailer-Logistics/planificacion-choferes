@@ -1316,13 +1316,17 @@ function saveEv(){
   if(tId&&busyT(tId,crDK)){toast_('Tracto ya asignado ese día','#dc2626');return;}
   if(rId&&busyR(rId,crDK)){toast_('Rampla ya asignada ese día','#dc2626');return;}
   const evId=Date.now()+'';
-  if(!evs[crDK])evs[crDK]={};
-  evs[crDK][evId]={id:evId,cId:cSel,tId,rId,cli,op:opSel,hi,hf,obs};
+  const newEv={id:evId,cId:cSel,tId,rId,cli,op:opSel,hi,hf,obs};
   close_('ovC');
   const c2=C.find(x=>x.id===cSel);
   toast_(`✓ ${cap(c2.n)} asignado`,'#059669');
-  render();
-  if(window._db)window._db.ref('evs').set(evs);
+  if(window._db){
+    window._db.ref('evs/'+crDK+'/'+evId).set(newEv);
+  } else {
+    if(!evs[crDK])evs[crDK]={};
+    evs[crDK][evId]=newEv;
+    render();
+  }
 }
 
 // ════════════════════════════════════
@@ -1349,9 +1353,15 @@ function showDet(key,evId){
 }
 function delEv(){
   if(!detRef)return;
-  if(evs[detRef.key])delete evs[detRef.key][detRef.evId];
-  close_('ovD');toast_('Entrada eliminada','#ea580c');render();
-  if(window._db)window._db.ref('evs').set(evs);
+  const {key,evId}=detRef;
+  close_('ovD');
+  toast_('Entrada eliminada','#ea580c');
+  if(window._db){
+    window._db.ref('evs/'+key+'/'+evId).remove();
+  } else {
+    if(evs[key])delete evs[key][evId];
+    render();
+  }
 }
 
 // ════════════════════════════════════
@@ -1555,24 +1565,18 @@ function seed(){
   const db = firebase.database();
   window._db = db;
 
-  let firstLoad = true;
   db.ref('evs').on('value', snapshot => {
     const data = snapshot.val();
-    if (firstLoad && !data) {
-      // Primera vez: la base está vacía → sembrar datos demo
+    if (!data) {
+      // Base vacía → sembrar datos demo una sola vez
       seed();
       db.ref('evs').set(evs);
-      firstLoad = false;
-      return; // el set() disparará otro onValue con los datos
+      return;
     }
-    firstLoad = false;
-    if (data) evs = data;
+    evs = data;
     render();
     updateKPIs();
   });
-
-  // Render inicial inmediato (calendario vacío mientras carga Firebase)
-  render();
 })();
 </script>
 </body>
