@@ -1713,12 +1713,18 @@ async function loadSupabase(){
     });
   }
 
-  // Viajes del trimestre visible
+  // Viajes: mes actual ± 1 mes, ordenado por fecha para no perder datos al llegar al límite
   const now=new Date();
   const from=new Date(now.getFullYear(),now.getMonth()-1,1).toISOString().split('T')[0];
-  const to=new Date(now.getFullYear(),now.getMonth()+3,0).toISOString().split('T')[0];
+  const to=new Date(now.getFullYear(),now.getMonth()+2,0).toISOString().split('T')[0];
   const cols='viaje_id,nro_viaje,cliente_estandar,tipo_operacion,patente_tracto,patente_rampla,conductor_principal,rut_conductor_uno,conductor_dos,rut_conductor_dos,estado_viaje_estandar,fecha_entrada_origen,fecha_salida_origen,fecha_entrada_destino,fecha_salida_destino,hora_salida_origen,hora_entrada_destino';
-  const viajes=await sbGet('v_viajes_inteligentes',`select=${cols}&fecha_salida_origen=gte.${from}&fecha_salida_origen=lte.${to}&fecha_salida_origen=not.is.null&limit=2000`);
+  // Paginamos en bloques de 1000 para superar el límite de Supabase
+  let viajes=[], offset=0, chunk;
+  do {
+    chunk=await sbGet('v_viajes_inteligentes',`select=${cols}&fecha_salida_origen=gte.${from}&fecha_salida_origen=lte.${to}&fecha_salida_origen=not.is.null&order=fecha_salida_origen.asc&limit=1000&offset=${offset}`);
+    if(Array.isArray(chunk)) viajes.push(...chunk);
+    offset+=1000;
+  } while(Array.isArray(chunk)&&chunk.length===1000);
   console.log('[SB] viajes cargados:',Array.isArray(viajes)?viajes.length:viajes);
 
   // Cargar eventos manuales de localStorage
