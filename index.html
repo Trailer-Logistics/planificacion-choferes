@@ -1699,6 +1699,7 @@ async function loadSupabase(){
       C.push({id:c.id,n:parts.slice(0,mid).join(' '),a:parts.slice(mid).join(' '),rut:c.rut||'',lic:'2099-01-01'});
     });
   }
+  console.log('[SB] conductores cargados:',C.length, C.map(c=>c.id+':'+c.rut).slice(0,5));
 
   // Vehículos activos
   const vehs=await sbGet('b_vehiculos','select=id,patente,tipo_vehiculo,estado&estado=eq.1');
@@ -1718,6 +1719,7 @@ async function loadSupabase(){
   const to=new Date(now.getFullYear(),now.getMonth()+3,0).toISOString().split('T')[0];
   const cols='viaje_id,nro_viaje,cliente_estandar,tipo_operacion,patente_tracto,patente_rampla,conductor_principal,rut_conductor_uno,conductor_dos,rut_conductor_dos,estado_viaje_estandar,fecha_entrada_origen,fecha_salida_origen,fecha_entrada_destino,fecha_salida_destino,hora_salida_origen,hora_entrada_destino';
   const viajes=await sbGet('v_viajes_inteligentes',`select=${cols}&fecha_salida_origen=gte.${from}&fecha_salida_origen=lte.${to}&fecha_salida_origen=not.is.null&limit=2000`);
+  console.log('[SB] viajes cargados:',Array.isArray(viajes)?viajes.length:viajes);
 
   // Cargar eventos manuales de localStorage
   const manual=lsLoad();
@@ -1731,6 +1733,10 @@ async function loadSupabase(){
       if(!dateStart) return;
       const cond=C.find(c=>c.rut===v.rut_conductor_uno);
       const cond2=C.find(c=>c.rut===v.rut_conductor_dos);
+      // Debug viaje 7073 y Atilio
+      if(v.viaje_id===7073||v.viaje_id===7193||(v.conductor_principal||'').toLowerCase().includes('atilio')){
+        console.log('[SB] viaje Atilio:',v.viaje_id,'rut_v:'+v.rut_conductor_uno,'cond?:',cond?.id,'dateStart:',dateStart,'dateEnd:',dateEnd);
+      }
       const tracto=T.find(t=>t.p===v.patente_tracto);
       const rampla=R.find(r=>r.p===v.patente_rampla);
       const eid=String(v.viaje_id);
