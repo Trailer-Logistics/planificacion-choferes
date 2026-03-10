@@ -1246,8 +1246,11 @@ function getTripState(ev, refKey){
   // Usar estado real de Supabase si está disponible
   if(ev.estado){
     const u=ev.estado.toUpperCase();
-    if(u==='ASIGNADO')                               return{label:'Asignado',color:'#6b7280'};
-    if(u==='EN RUTA'||u.includes('RUTA'))            return{label:'En Ruta',color:'#3b82f6'};
+    if(u==='PLANIFICADO')                            return{label:'Planificado',color:'#7c3aed'};
+    if(u==='ASIGNADO')                               return{label:'Asignado',color:'#dc2626'};
+    if(u==='EN RUTA'||u.includes('RUTA'))            return{label:'En Ruta',color:'#d4911a'};
+    if(u.includes('PENDIENTE DE DESTINO'))           return{label:'Pend. Destino',color:'#2563eb'};
+    if(u.includes('PENDIENTE'))                      return{label:'Pendiente',color:'#2563eb'};
     if(u==='FINALIZADO'||u.includes('FINAL'))        return{label:'Finalizado',color:'#10b981'};
     if(u.includes('ORIGEN')&&u.includes('TRANSITO')) return{label:'Tráns. Origen',color:'#6b7280'};
     if(u.includes('ORIGEN'))                         return{label:'En Origen',color:'#f97316'};
@@ -1422,10 +1425,11 @@ function renderTimeline(){
 
     const bars=cEvs.map(ev=>{
       const c2=C.find(x=>x.id===ev.cId), t2=T.find(x=>x.id===ev.tId);
-      const sMs=Math.max(new Date(ev._dateStart+'T12:00:00').getTime(), new Date(y,m,1).getTime());
-      const eMs=Math.min(new Date(ev._dateEnd+'T12:00:00').getTime(), new Date(y,m,dim).getTime());
-      const startDay=Math.round((sMs-monthStartMs)/864e5);
-      const spanDays=Math.max(1,Math.round((eMs-sMs)/864e5)+1);
+      const evS=new Date(ev._dateStart+'T00:00:00'), evE=new Date(ev._dateEnd+'T00:00:00');
+      const mS=new Date(y,m,1), mE=new Date(y,m,dim);
+      const clampS=evS<mS?mS:evS, clampE=evE>mE?mE:evE;
+      const startDay=Math.floor((clampS-mS)/864e5);
+      const spanDays=Math.max(1,Math.floor((clampE-clampS)/864e5)+1);
       const leftPct=(startDay/dim)*100;
       const widthPct=(spanDays/dim)*100;
       const col=OPC[ev.op];
@@ -1584,7 +1588,7 @@ function showDet(key,evId){
   const ramplaP=r2?r2.p:(ev._patenteRampla||'');
   const rows=[
     ev.nroViaje&&{ic:'🔢',k:'N° Viaje',v:`<span style="font-family:var(--mono);color:var(--gold)">${ev.nroViaje}</span>`},
-    {ic:'📋',k:'Operación',v:`<span style="color:${col};font-weight:700">${OPL[ev.op]||ev.op||'—'}</span>`},
+    ev.tipoOp&&{ic:'🚛',k:'Tipo trailer',v:ev.tipoOp},
     {ic:'🚦',k:'Estado',v:`<span style="color:${state.color};font-weight:700">${state.label}</span>`},
     cName&&{ic:'👤',k:'Conductor',v:`${cName}${c2?' <span style="color:#8fa8d8;font-size:11.5px">· '+c2.rut+'</span>':''}`},
     ev._conductorDosNombre&&{ic:'👤',k:'Conductor 2',v:ev._conductorDosNombre},
@@ -1668,6 +1672,17 @@ function mapOp(tipo){
   if(t.includes('mant')) return 'mantencion';
   return 'carga';
 }
+// Color del evento basado en estado real de Supabase
+function estadoToOp(estado){
+  if(!estado) return 'carga';
+  const u=estado.toUpperCase();
+  if(u==='PLANIFICADO')              return 'vacaciones';  // gris/morado
+  if(u==='ASIGNADO')                 return 'licencia';    // rojo suave
+  if(u==='EN RUTA')                  return 'ambos';       // dorado
+  if(u.includes('PENDIENTE'))        return 'descarga';    // azul
+  if(u==='FINALIZADO')               return 'carga';       // verde
+  return 'carga';
+}
 
 async function loadSupabase(){
   // Conductores activos
@@ -1722,7 +1737,7 @@ async function loadSupabase(){
         id:eid, nroViaje:v.nro_viaje,
         cId:cond?.id, cId2:cond2?.id,
         tId:tracto?.id, rId:rampla?.id,
-        cli:v.cliente_estandar, op:mapOp(v.tipo_operacion),
+        cli:v.cliente_estandar, op:estadoToOp(v.estado_viaje_estandar), tipoOp:v.tipo_operacion,
         hi:v.hora_salida_origen||'08:00', hf:v.hora_entrada_destino||'18:00',
         dateStart, dateEnd,
         estado:v.estado_viaje_estandar,
