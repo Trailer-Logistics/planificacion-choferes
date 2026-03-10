@@ -1424,7 +1424,7 @@ function renderTimeline(){
 
     const bars=cEvs.map(ev=>{
       const c2=C.find(x=>x.id===ev.cId), t2=T.find(x=>x.id===ev.tId);
-      const evS=new Date(ev._dateStart+'T00:00:00'), evE=new Date(ev._dateEnd+'T00:00:00');
+      const evS=new Date(ev._dateStart.substring(0,10)+'T00:00:00'), evE=new Date(ev._dateEnd.substring(0,10)+'T00:00:00');
       const mS=new Date(y,m,1), mE=new Date(y,m,dim);
       const clampS=evS<mS?mS:evS, clampE=evE>mE?mE:evE;
       const startDay=Math.floor((clampS-mS)/864e5);
@@ -1725,8 +1725,9 @@ async function loadSupabase(){
 
   if(Array.isArray(viajes)){
     viajes.forEach(v=>{
-      const dateStart=v.fecha_salida_origen;
-      const dateEnd=v.fecha_salida_destino||v.fecha_entrada_destino||dateStart;
+      const dateStart=(v.fecha_salida_origen||'').substring(0,10);
+      const rawEnd=v.fecha_salida_destino||v.fecha_entrada_destino||v.fecha_salida_origen;
+      const dateEnd=(rawEnd||'').substring(0,10)||dateStart;
       if(!dateStart) return;
       const cond=C.find(c=>c.rut===v.rut_conductor_uno);
       const cond2=C.find(c=>c.rut===v.rut_conductor_dos);
