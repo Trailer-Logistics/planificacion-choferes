@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fleet Command — Trailer Logistics Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   --bg:#0a0e1a;
@@ -1084,73 +1083,10 @@ body { font-size:13.5px !important; line-height:1.55 !important; -webkit-font-sm
 // ════════════════════════════════════
 // DATA
 // ════════════════════════════════════
-const C=[
-  {id:2,n:"Walter",a:"Jimenez",rut:"15.749.016-8",lic:"2027-03-07"},
-  {id:3,n:"Javier",a:"Valdes",rut:"19.448.344-9",lic:"2026-08-11"},
-  {id:54,n:"Rodrigo",a:"Romero Muñoz",rut:"12.487.538-2",lic:"2028-04-10"},
-  {id:17,n:"Marcos",a:"Riquelme",rut:"10.268.797-3",lic:"2026-10-08"},
-  {id:42,n:"Claudio",a:"Riveros",rut:"8.232.546-8",lic:"2027-09-19"},
-  {id:18,n:"Jonatan",a:"Caridi",rut:"20.898.723-2",lic:"2028-10-26"},
-  {id:101,n:"Jorge Octavio",a:"Mora",rut:"11.647.355-0",lic:"2027-07-08"},
-  {id:13,n:"Victor",a:"Muñoz",rut:"13.119.470-6",lic:"2027-06-19"},
-  {id:22,n:"Atilio",a:"Escalante",rut:"9.559.947-8",lic:"2029-12-17"},
-  {id:21,n:"Ruben",a:"Moore",rut:"12.966.886-5",lic:"2027-11-17"},
-  {id:4,n:"Brian",a:"Muñoz Herrera",rut:"18.258.432-0",lic:"2026-07-08"},
-  {id:5,n:"Ignacio",a:"Morales",rut:"19.117.031-8",lic:"2028-07-15"},
-  {id:40,n:"Michael",a:"Diaz",rut:"17.669.359-2",lic:"2026-08-31"},
-  {id:43,n:"Diego",a:"Venegas",rut:"17.608.043-4",lic:"2028-07-25"},
-  {id:15,n:"Jonathan",a:"Aguilera",rut:"16.458.426-7",lic:"2029-08-13"},
-  {id:6,n:"Carlos",a:"Contreras",rut:"15.609.330-0",lic:"2026-08-28"},
-  {id:14,n:"Jorge",a:"Catalan",rut:"10.112.525-4",lic:"2026-08-06"},
-  {id:29,n:"Nelson",a:"Ramirez",rut:"13.707.753-1",lic:"2029-09-08"},
-  {id:37,n:"Nestor",a:"Salvo",rut:"13.834.333-2",lic:"2028-01-20"},
-  {id:10,n:"Miguel",a:"Zapata",rut:"15.929.913-9",lic:"2029-01-03"},
-  {id:57,n:"Luis",a:"Moore",rut:"9.645.716-2",lic:"2027-11-04"},
-  {id:38,n:"Mauricio",a:"Macaya",rut:"13.793.360-8",lic:"2029-02-20"},
-  {id:46,n:"Omar",a:"Avalos",rut:"8.382.591-k",lic:"2027-10-14"},
-  {id:87,n:"Marcelo",a:"Nuñez",rut:"12.894.700-0",lic:"2027-08-07"},
-  {id:9,n:"Paulo",a:"Oryan",rut:"18.212.038-3",lic:"2026-12-15"},
-  {id:66,n:"Darwin",a:"Poblete",rut:"15.348.076-1",lic:"2028-06-06"},
-  {id:63,n:"Roberpierre",a:"Castillo",rut:"15.826.559-1",lic:"2029-11-06"},
-  {id:62,n:"Luis",a:"Jara",rut:"10.100.533-k",lic:"2028-07-02"},
-  {id:39,n:"Cesar",a:"Apaza",rut:"11.611.600-6",lic:"2028-05-28"},
-  {id:41,n:"Cristian",a:"Salinas",rut:"14.364.612-2",lic:"2028-07-25"},
-  {id:8,n:"Francisco",a:"Santibañez",rut:"14.477.656-9",lic:"2027-11-20"},
-  {id:58,n:"Pedro",a:"Garrido",rut:"15.605.422-4",lic:"2028-12-27"},
-  {id:48,n:"Juan",a:"Bulman",rut:"15.391.759-0",lic:"2028-03-16"},
-  {id:7,n:"Junior",a:"Brun",rut:"26.225.773-8",lic:"2029-08-05"},
-  {id:16,n:"David",a:"Valdes",rut:"15.552.054-k",lic:"2027-08-12"},
-  {id:19,n:"Sebastian",a:"Jara",rut:"16.458.761-4",lic:"2029-11-04"},
-  {id:56,n:"Francisco",a:"Poblete",rut:"15.604.694-9",lic:"2028-10-14"},
-  {id:44,n:"Pablo",a:"Verdejo",rut:"13.827.857-3",lic:"2027-09-28"},
-];
+let C=[];
 const CLIENTES=["Walmart Chile","Falabella Retail","Sodimac Homecenter","Jumbo","Ripley","Lider Express","Paris CDC","Corona","SMU","Easy","Cencosud","Tottus","Hites","La Polar","Unimarc","OK Market","Costco Chile","Construmart","Ferreteria Imperial","DHL Chile","Fedex Chile","Starken","Blue Express","Chilexpress","CCU","CMPC","SQM","Codelco","Nestlé Chile","Unilever Chile","P&G Chile","Pepsico","Coca-Cola Andina","Agrosuper","Watt's","Concha y Toro","Viña Santa Rita","Viña Concha y Toro","Entel","Claro Chile"];
-const T=[
-  {id:30259,p:"TRDP-73",m:"IVECO",mo:"NEW ACTROS"},
-  {id:40138,p:"TKXJ-99",m:"RENAULT",mo:"T480"},
-  {id:40139,p:"TKXK-10",m:"RENAULT",mo:"T480"},
-  {id:40140,p:"TKXK-11",m:"RENAULT",mo:"T480"},
-  {id:40141,p:"TKXK-12",m:"RENAULT",mo:"T520"},
-  {id:40383,p:"TKRS-56",m:"RENAULT",mo:"D WIDE E TECH"},
-  {id:40513,p:"TRDL-95",m:"IVECO",mo:"SWAY"},
-  {id:40694,p:"RRYR-15",m:"SCANIA",mo:"R500A6X2"},
-  {id:40695,p:"RRYR-14",m:"SCANIA",mo:"R500A6X2"},
-  {id:40696,p:"RHDS-12",m:"SCANIA",mo:"R500A"},
-  {id:40709,p:"TYRK-12",m:"SCANIA",mo:"R500A"},
-  {id:40719,p:"TTSZ-73",m:"RENAULT",mo:"C430"},
-  {id:41617,p:"VJWL-64",m:"RENAULT",mo:"T480"},
-];
-const R=[
-  {id:27512,p:"PXFJ-35",m:"LECITRAILER",mo:"TOTAL SIDER"},
-  {id:28092,p:"PXFJ-80",m:"LECITRAILER",mo:"LTP KINEDYNE"},
-  {id:28387,p:"PWYW-94",m:"LECITRAILER",mo:"Joloda3_24V"},
-  {id:30433,p:"KDGT-91",m:"SDC",mo:"CURTAINSIDER"},
-  {id:32885,p:"PXCT-17",m:"KRONE",mo:"PROFI LINER"},
-  {id:40734,p:"PWVY-53",m:"BURGERS",mo:"DOUBLEDECK"},
-  {id:40735,p:"PWZT-41",m:"BURGERS",mo:"DOUBLEDECK WM"},
-  {id:40751,p:"PXFF-13",m:"LECITRAILER",mo:"Joloda2"},
-  {id:40895,p:"PWYW-93",m:"BURGERS",mo:"FRIGORIFICO"},
-];
+let T=[];
+let R=[];
 
 // ════════════════════════════════════
 // STATE
@@ -1307,16 +1243,27 @@ function mCell(key,num,other,tod){
 
 // ── TRIP STATE (date-based or op-based) ──
 function getTripState(ev, refKey){
+  // Usar estado real de Supabase si está disponible
+  if(ev.estado){
+    const u=ev.estado.toUpperCase();
+    if(u.includes('ORIGEN')&&u.includes('TRANSITO')) return{label:'Tráns. Origen',color:'#6b7280'};
+    if(u.includes('ORIGEN')) return{label:'En Origen',color:'#f97316'};
+    if(u.includes('DESTINO')&&u.includes('TRANSITO')) return{label:'Tráns. Destino',color:'#3b82f6'};
+    if(u.includes('DESTINO')) return{label:'En Destino',color:'#10b981'};
+    if(u.includes('TERMIN')) return{label:'Terminado',color:'#059669'};
+    return{label:ev.estado,color:'#6b7280'};
+  }
+  // Cálculo por fechas si tiene rango
   if(ev.dateStart && ev.dateEnd){
-    const s=new Date(ev.dateStart+'T12:00:00'), e=new Date(ev.dateEnd+'T12:00:00'), r=new Date(refKey+'T12:00:00');
-    const pct=Math.max(0,Math.min(1,(r-s)/(e-s)||0));
-    if(pct<.25) return{label:'Tráns. Origen',color:'#6b7280'};
-    if(pct<.50) return{label:'En Carga',color:'#f97316'};
-    if(pct<.75) return{label:'Tráns. Destino',color:'#3b82f6'};
-    return{label:'En Descarga',color:'#10b981'};
+    const ref=new Date(refKey+'T12:00:00');
+    if(ev._fechaSalidaDestino && ref>=new Date(ev._fechaSalidaDestino)) return{label:'Terminado',color:'#059669'};
+    if(ev._fechaEntradaDestino && ref>=new Date(ev._fechaEntradaDestino)) return{label:'En Destino',color:'#10b981'};
+    if(ev._fechaSalidaOrigen && ref>=new Date(ev._fechaSalidaOrigen)) return{label:'Tráns. Destino',color:'#3b82f6'};
+    if(ev._fechaEntradaOrigen && ref>=new Date(ev._fechaEntradaOrigen)) return{label:'En Origen',color:'#f97316'};
+    return{label:'Tráns. Origen',color:'#6b7280'};
   }
   const m={carga:{label:'En Carga',color:'#059669'},descarga:{label:'Descarga',color:'#2563eb'},ambos:{label:'Carga+Desc',color:'#d4911a'},mantencion:{label:'Mantención',color:'#ea580c'},vacaciones:{label:'Vacaciones',color:'#7c3aed'},licencia:{label:'Licencia',color:'#dc2626'}};
-  return m[ev.op]||{label:ev.op,color:'#6b7280'};
+  return m[ev.op]||{label:ev.op||'',color:'#6b7280'};
 }
 
 // ── COLLECT EVENTS OVERLAPPING A DATE RANGE ──
@@ -1606,18 +1553,15 @@ function saveEv(){
   if(busyC(cSel,crDK)){toast_('Conductor ya tiene asignación ese día','#dc2626');return;}
   if(tId&&busyT(tId,crDK)){toast_('Tracto ya asignado ese día','#dc2626');return;}
   if(rId&&busyR(rId,crDK)){toast_('Rampla ya asignada ese día','#dc2626');return;}
-  const evId=Date.now()+'';
-  const newEv={id:evId,cId:cSel,tId,rId,cli,op:opSel,hi,hf,obs};
+  const evId='m'+Date.now();
+  const newEv={id:evId,cId:cSel,tId,rId,cli,op:opSel,hi,hf,obs,_manual:true};
   close_('ovC');
   const c2=C.find(x=>x.id===cSel);
-  toast_(`✓ ${cap(c2.n)} asignado`,'#059669');
-  if(window._db){
-    window._db.ref('evs2/'+crDK+'/'+evId).set(newEv);
-  } else {
-    if(!evs[crDK])evs[crDK]={};
-    evs[crDK][evId]=newEv;
-    render();
-  }
+  toast_(`✓ ${cap(c2?.n||'')} asignado`,'#059669');
+  if(!evs[crDK])evs[crDK]={};
+  evs[crDK][evId]=newEv;
+  lsSave();
+  render();
 }
 
 // ════════════════════════════════════
@@ -1630,13 +1574,21 @@ function showDet(key,evId){
   const d=pk(key);
   document.getElementById('dtit').textContent=c2?`${cap(c2.n)} ${cap(c2.a)}`:OPL[ev.op];
   document.getElementById('dsub').textContent=`${DFULL[d.getDay()]} ${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()} · ${ev.hi} → ${ev.hf}`;
-  const col=OPC[ev.op];
+  const col=OPC[ev.op]||'#6b7280';
+  const state=getTripState(ev, key);
+  const cName=c2?`${cap(c2.n)} ${cap(c2.a)}`:(ev._conductorNombre||'');
+  const tractoP=t2?t2.p:(ev._patenteTracto||'');
+  const ramplaP=r2?r2.p:(ev._patenteRampla||'');
   const rows=[
-    {ic:'📋',k:'Operación',v:`<span style="color:${col};font-weight:700">${OPL[ev.op]}</span>`},
-    c2&&{ic:'👤',k:'Conductor',v:`${cap(c2.n)} ${cap(c2.a)} <span style="color:#8fa8d8;font-size:11.5px">· ${c2.rut}</span>`},
-    t2&&{ic:'🚛',k:'Tracto',v:`<span style="font-family:var(--mono);font-weight:500;color:var(--blue)">${t2.p}</span> <span style="color:var(--text2)">· ${t2.m} ${t2.mo}</span>`},
-    r2&&{ic:'🚜',k:'Rampla',v:`<span style="font-family:var(--mono)">${r2.p}</span> <span style="color:var(--text2)">· ${r2.m} ${r2.mo}</span>`},
+    ev.nroViaje&&{ic:'🔢',k:'N° Viaje',v:`<span style="font-family:var(--mono);color:var(--gold)">${ev.nroViaje}</span>`},
+    {ic:'📋',k:'Operación',v:`<span style="color:${col};font-weight:700">${OPL[ev.op]||ev.op||'—'}</span>`},
+    {ic:'🚦',k:'Estado',v:`<span style="color:${state.color};font-weight:700">${state.label}</span>`},
+    cName&&{ic:'👤',k:'Conductor',v:`${cName}${c2?' <span style="color:#8fa8d8;font-size:11.5px">· '+c2.rut+'</span>':''}`},
+    ev._conductorDosNombre&&{ic:'👤',k:'Conductor 2',v:ev._conductorDosNombre},
+    tractoP&&{ic:'🚛',k:'Tracto',v:`<span style="font-family:var(--mono);font-weight:500;color:var(--blue)">${tractoP}</span>`},
+    ramplaP&&{ic:'🚜',k:'Rampla',v:`<span style="font-family:var(--mono)">${ramplaP}</span>`},
     ev.cli&&{ic:'🏢',k:'Cliente',v:ev.cli},
+    ev.dateStart&&{ic:'📅',k:'Fechas',v:`${ev.dateStart} → ${ev.dateEnd||ev.dateStart}`},
     ev.obs&&{ic:'📝',k:'Observación',v:ev.obs},
   ].filter(Boolean);
   document.getElementById('dbody').innerHTML=rows.map(r=>`<div class="drow"><div class="dic">${r.ic}</div><div><div class="dk2">${r.k}</div><div class="dv">${r.v}</div></div></div>`).join('');
@@ -1645,14 +1597,13 @@ function showDet(key,evId){
 function delEv(){
   if(!detRef)return;
   const {key,evId}=detRef;
+  const ev=dayEvsList(key).find(e=>e.id===evId);
+  if(ev && !ev._manual){toast_('Los viajes de Supabase no se pueden eliminar aquí','#f97316');return;}
   close_('ovD');
   toast_('Entrada eliminada','#ea580c');
-  if(window._db){
-    window._db.ref('evs2/'+key+'/'+evId).remove();
-  } else {
-    if(evs[key])delete evs[key][evId];
-    render();
-  }
+  if(evs[key])delete evs[key][evId];
+  lsSave();
+  render();
 }
 
 // ════════════════════════════════════
@@ -1686,28 +1637,105 @@ function updateKPIs(){
 // ════════════════════════════════════
 // DEMO SEED
 // ════════════════════════════════════
-function seed(){
-  const t=new Date(),y=t.getFullYear(),m=t.getMonth();
-  const add=(off,cId,tId,rId,op,cli,hi,hf,obs='')=>{
-    const d=new Date(y,m,t.getDate()+off),k=dk(d);
-    if(!evs[k])evs[k]={};
-    const eid='e'+Date.now()+Math.floor(Math.random()*1e9);
-    evs[k][eid]={id:eid,cId,tId,rId,cli,op,hi,hf,obs};
-  };
-  add(0,2,30259,27512,'carga','Walmart Chile','07:00','16:00');
-  add(0,3,40138,28092,'descarga','Falabella Retail','09:00','18:00');
-  add(0,54,40694,null,'mantencion','','08:00','17:00','Taller Norte');
-  add(1,17,40695,30433,'ambos','Sodimac Homecenter','06:00','20:00');
-  add(1,42,40139,28387,'carga','Jumbo','08:00','14:00');
-  add(2,18,40140,32885,'descarga','Ripley','10:00','19:00');
-  add(-1,13,null,null,'vacaciones','','00:00','23:59');
-  add(3,22,40383,27512,'carga','Paris CDC','07:30','16:30');
-  add(4,4,40513,null,'mantencion','','08:00','17:00','Cambio neumáticos');
-  add(5,5,null,40734,'descarga','Corona','09:00','17:00');
-  add(-2,40,40142,40735,'carga','SMU','06:00','15:00');
-  add(6,6,null,null,'licencia','','00:00','23:59');
-  add(7,14,40696,null,'carga','Tottus','07:00','15:00');
-  add(8,29,40709,32885,'descarga','Nestlé Chile','08:00','18:00');
+// ════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════
+const SB_URL='https://cfcgkeexjewhijajltwg.supabase.co';
+const SB_KEY='sb_publishable_ABThEK5aihgvRmxe1wLMwA_ZbxBKbcF';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+function lsSave(){
+  const manual={};
+  Object.entries(evs).forEach(([k,dayEvs])=>{
+    const m=Object.fromEntries(Object.entries(dayEvs).filter(([,e])=>e._manual));
+    if(Object.keys(m).length) manual[k]=m;
+  });
+  localStorage.setItem('tl_manual_evs',JSON.stringify(manual));
+}
+function lsLoad(){
+  try{return JSON.parse(localStorage.getItem('tl_manual_evs')||'{}');}catch{return {};}
+}
+
+function mapOp(tipo){
+  if(!tipo) return 'carga';
+  const t=tipo.toLowerCase();
+  if(t.includes('desc')&&t.includes('carg')) return 'ambos';
+  if(t.includes('desc')) return 'descarga';
+  if(t.includes('carg')) return 'carga';
+  if(t.includes('mant')) return 'mantencion';
+  return 'carga';
+}
+
+async function loadSupabase(){
+  // Conductores activos
+  const{data:conds}=await sb.from('b_conductores').select('id,nombre,rut,estado').eq('estado',1).order('nombre');
+  if(conds){
+    C.length=0;
+    conds.forEach(c=>{
+      const parts=(c.nombre||'').trim().split(/\s+/);
+      const mid=Math.ceil(parts.length/2);
+      C.push({id:c.id,n:parts.slice(0,mid).join(' '),a:parts.slice(mid).join(' '),rut:c.rut||'',lic:'2099-01-01'});
+    });
+  }
+
+  // Vehículos activos
+  const{data:vehs}=await sb.from('b_vehiculos').select('id,patente,tipo_vehiculo,estado').eq('estado',1);
+  if(vehs){
+    T.length=0; R.length=0;
+    vehs.forEach(v=>{
+      const tipo=(v.tipo_vehiculo||'').toLowerCase();
+      const obj={id:v.id,p:v.patente||'',m:'',mo:v.tipo_vehiculo||''};
+      if(tipo.includes('tracto')||tipo.includes('camion')||tipo.includes('cabez')) T.push(obj);
+      else R.push(obj);
+    });
+  }
+
+  // Viajes del trimestre visible
+  const now=new Date();
+  const from=new Date(now.getFullYear(),now.getMonth()-1,1).toISOString().split('T')[0];
+  const to=new Date(now.getFullYear(),now.getMonth()+3,0).toISOString().split('T')[0];
+  const{data:viajes}=await sb.from('v_viajes_inteligentes')
+    .select('viaje_id,nro_viaje,cliente_estandar,tipo_operacion,patente_tracto,patente_rampla,conductor_principal,rut_conductor_uno,conductor_dos,rut_conductor_dos,estado_viaje_estandar,fecha_entrada_origen,fecha_salida_origen,fecha_entrada_destino,fecha_salida_destino,hora_salida_origen,hora_entrada_destino')
+    .gte('fecha_salida_origen',from)
+    .lte('fecha_salida_origen',to)
+    .not('fecha_salida_origen','is',null);
+
+  // Cargar eventos manuales de localStorage
+  const manual=lsLoad();
+  evs=JSON.parse(JSON.stringify(manual));
+
+  if(viajes){
+    viajes.forEach(v=>{
+      const dateStart=v.fecha_salida_origen;
+      const dateEnd=v.fecha_salida_destino||v.fecha_entrada_destino||dateStart;
+      if(!dateStart) return;
+      const cond=C.find(c=>c.rut===v.rut_conductor_uno);
+      const cond2=C.find(c=>c.rut===v.rut_conductor_dos);
+      const tracto=T.find(t=>t.p===v.patente_tracto);
+      const rampla=R.find(r=>r.p===v.patente_rampla);
+      const eid=String(v.viaje_id);
+      if(!evs[dateStart]) evs[dateStart]={};
+      evs[dateStart][eid]={
+        id:eid, nroViaje:v.nro_viaje,
+        cId:cond?.id, cId2:cond2?.id,
+        tId:tracto?.id, rId:rampla?.id,
+        cli:v.cliente_estandar, op:mapOp(v.tipo_operacion),
+        hi:v.hora_salida_origen||'08:00', hf:v.hora_entrada_destino||'18:00',
+        dateStart, dateEnd,
+        estado:v.estado_viaje_estandar,
+        _conductorNombre:v.conductor_principal,
+        _conductorDosNombre:v.conductor_dos,
+        _patenteTracto:v.patente_tracto,
+        _patenteRampla:v.patente_rampla,
+        _fechaEntradaOrigen:v.fecha_entrada_origen,
+        _fechaSalidaOrigen:v.fecha_salida_origen,
+        _fechaEntradaDestino:v.fecha_entrada_destino,
+        _fechaSalidaDestino:v.fecha_salida_destino,
+      };
+    });
+  }
+  render();
+  updateKPIs();
 }
 
 // ════════════════════════════════════
@@ -1841,34 +1869,10 @@ function seed(){
 })();
 
 // ════════════════════════════════════
-// INIT — FIREBASE REALTIME SYNC
+// INIT
 // ════════════════════════════════════
-(function initFirebase(){
-  const app = firebase.initializeApp({
-    apiKey: "AIzaSyCJB1_L44ECrtFT951z7vBiFKdozftHMHQ",
-    authDomain: "planificacion-choferes.firebaseapp.com",
-    projectId: "planificacion-choferes",
-    storageBucket: "planificacion-choferes.firebasestorage.app",
-    messagingSenderId: "18427650463",
-    appId: "1:18427650463:web:d1ea20526bd47cc44c1daa",
-    databaseURL: "https://planificacion-choferes-default-rtdb.firebaseio.com"
-  });
-  const db = firebase.database();
-  window._db = db;
-
-  db.ref('evs2').on('value', snapshot => {
-    const data = snapshot.val();
-    if (!data) {
-      // Base vacía → sembrar datos demo una sola vez
-      seed();
-      db.ref('evs2').set(evs);
-      return;
-    }
-    evs = data;
-    render();
-    updateKPIs();
-  });
-})();
+render(); // render vacío inicial
+loadSupabase();
 </script>
 <div id="tl-tip"><div class="tt-title" id="tt-name"></div><div class="tt-row" id="tt-op"></div><div class="tt-row" id="tt-dates"></div><div class="tt-row" id="tt-tracto"></div><div class="tt-row" id="tt-cli"></div></div>
 </body>
