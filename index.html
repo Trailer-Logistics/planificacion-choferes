@@ -1246,11 +1246,14 @@ function getTripState(ev, refKey){
   // Usar estado real de Supabase si está disponible
   if(ev.estado){
     const u=ev.estado.toUpperCase();
+    if(u==='ASIGNADO')                               return{label:'Asignado',color:'#6b7280'};
+    if(u==='EN RUTA'||u.includes('RUTA'))            return{label:'En Ruta',color:'#3b82f6'};
+    if(u==='FINALIZADO'||u.includes('FINAL'))        return{label:'Finalizado',color:'#10b981'};
     if(u.includes('ORIGEN')&&u.includes('TRANSITO')) return{label:'Tráns. Origen',color:'#6b7280'};
-    if(u.includes('ORIGEN')) return{label:'En Origen',color:'#f97316'};
-    if(u.includes('DESTINO')&&u.includes('TRANSITO')) return{label:'Tráns. Destino',color:'#3b82f6'};
-    if(u.includes('DESTINO')) return{label:'En Destino',color:'#10b981'};
-    if(u.includes('TERMIN')) return{label:'Terminado',color:'#059669'};
+    if(u.includes('ORIGEN'))                         return{label:'En Origen',color:'#f97316'};
+    if(u.includes('DESTINO')&&u.includes('TRANSITO'))return{label:'Tráns. Destino',color:'#3b82f6'};
+    if(u.includes('DESTINO'))                        return{label:'En Destino',color:'#10b981'};
+    if(u.includes('TERMIN'))                         return{label:'Terminado',color:'#059669'};
     return{label:ev.estado,color:'#6b7280'};
   }
   // Cálculo por fechas si tiene rango
