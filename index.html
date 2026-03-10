@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fleet Command — Trailer Logistics Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   --bg:#0a0e1a;
@@ -1649,7 +1648,12 @@ function updateKPIs(){
 // ════════════════════════════════════
 const SB_URL='https://cfcgkeexjewhijajltwg.supabase.co';
 const SB_KEY='sb_publishable_ABThEK5aihgvRmxe1wLMwA_ZbxBKbcF';
-const sb=supabase.createClient(SB_URL,SB_KEY);
+const SB_H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+async function sbGet(table,params=''){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?${params}`,{headers:SB_H});
+  if(!r.ok) throw new Error(`Supabase ${table}: ${r.status}`);
+  return r.json();
+}
 
 function lsSave(){
   const manual={};
@@ -1686,8 +1690,8 @@ function estadoToOp(estado){
 
 async function loadSupabase(){
   // Conductores activos
-  const{data:conds}=await sb.from('b_conductores').select('id,nombre,rut,estado').eq('estado',1).order('nombre');
-  if(conds){
+  const conds=await sbGet('b_conductores','select=id,nombre,rut,estado&estado=eq.1&order=nombre');
+  if(Array.isArray(conds)){
     C.length=0;
     conds.forEach(c=>{
       const parts=(c.nombre||'').trim().split(/\s+/);
@@ -1697,8 +1701,8 @@ async function loadSupabase(){
   }
 
   // Vehículos activos
-  const{data:vehs}=await sb.from('b_vehiculos').select('id,patente,tipo_vehiculo,estado').eq('estado',1);
-  if(vehs){
+  const vehs=await sbGet('b_vehiculos','select=id,patente,tipo_vehiculo,estado&estado=eq.1');
+  if(Array.isArray(vehs)){
     T.length=0; R.length=0;
     vehs.forEach(v=>{
       const tipo=(v.tipo_vehiculo||'').toLowerCase();
@@ -1712,17 +1716,14 @@ async function loadSupabase(){
   const now=new Date();
   const from=new Date(now.getFullYear(),now.getMonth()-1,1).toISOString().split('T')[0];
   const to=new Date(now.getFullYear(),now.getMonth()+3,0).toISOString().split('T')[0];
-  const{data:viajes}=await sb.from('v_viajes_inteligentes')
-    .select('viaje_id,nro_viaje,cliente_estandar,tipo_operacion,patente_tracto,patente_rampla,conductor_principal,rut_conductor_uno,conductor_dos,rut_conductor_dos,estado_viaje_estandar,fecha_entrada_origen,fecha_salida_origen,fecha_entrada_destino,fecha_salida_destino,hora_salida_origen,hora_entrada_destino')
-    .gte('fecha_salida_origen',from)
-    .lte('fecha_salida_origen',to)
-    .not('fecha_salida_origen','is',null);
+  const cols='viaje_id,nro_viaje,cliente_estandar,tipo_operacion,patente_tracto,patente_rampla,conductor_principal,rut_conductor_uno,conductor_dos,rut_conductor_dos,estado_viaje_estandar,fecha_entrada_origen,fecha_salida_origen,fecha_entrada_destino,fecha_salida_destino,hora_salida_origen,hora_entrada_destino';
+  const viajes=await sbGet('v_viajes_inteligentes',`select=${cols}&fecha_salida_origen=gte.${from}&fecha_salida_origen=lte.${to}&fecha_salida_origen=not.is.null&limit=2000`);
 
   // Cargar eventos manuales de localStorage
   const manual=lsLoad();
   evs=JSON.parse(JSON.stringify(manual));
 
-  if(viajes){
+  if(Array.isArray(viajes)){
     viajes.forEach(v=>{
       const dateStart=v.fecha_salida_origen;
       const dateEnd=v.fecha_salida_destino||v.fecha_entrada_destino||dateStart;
