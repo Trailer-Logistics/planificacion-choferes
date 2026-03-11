@@ -866,6 +866,7 @@ function renderSidebar(){
   if(sTab==='c'){
     const f=C.filter(c=>`${c.n} ${c.a} ${c.rut}`.toLowerCase().includes(q));
     if(!f.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">Sin resultados</div>';return;}
+    f.sort((a,b)=>anyBusyC(a.id)-anyBusyC(b.id));
     f.forEach(c=>{
       const b=anyBusyC(c.id);
       const d=new Date(c.lic),diff=(d-new Date())/864e5;
@@ -881,9 +882,14 @@ function renderSidebar(){
       </div>`;
     });
   } else {
-    const all=[...T.map(v=>({...v,t:'t',...{tipo:'Tracto'}}),...R.map(v=>({...v,t:'r',...{tipo:'Rampla'}})))];
+    const all=[...T.map(v=>({...v,t:'t',tipo:'Tracto'})),...R.map(v=>({...v,t:'r',tipo:'Rampla'}))];
     const f=all.filter(v=>`${v.p} ${v.m} ${v.mo}`.toLowerCase().includes(q));
     if(!f.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">Sin resultados</div>';return;}
+    // Libres primero dentro de cada tipo
+    f.sort((a,b)=>{
+      if(a.tipo!==b.tipo) return a.tipo==='Tracto'?-1:1;
+      return anyBusyV(a.id,a.t)-anyBusyV(b.id,b.t);
+    });
     let pt='';
     f.forEach(v=>{
       if(v.tipo!==pt){h+=`<div class="sgroup">${v.tipo==='Tracto'?'🚛 Tractos':'🚜 Ramplas'}</div>`;pt=v.tipo;}
@@ -1548,7 +1554,7 @@ async function loadSupabase(){
   console.log('[SB] conductores cargados:',C.length, C.map(c=>c.id+':'+c.rut).slice(0,5));
 
   // Vehículos activos
-  const vehs=await sbGet('b_vehiculos','select=id,patente,tipo_vehiculo,estado&estado=eq.1');
+  const vehs=await sbGet('b_vehiculos','select=id,patente,tipo_vehiculo,transportista,estado&estado=eq.1&transportista=eq.TRAILER LOGISTICS&order=patente.asc');
   if(Array.isArray(vehs)){
     T.length=0; R.length=0;
     vehs.forEach(v=>{
