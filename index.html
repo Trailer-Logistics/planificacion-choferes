@@ -1554,7 +1554,7 @@ async function loadSupabase(){
   console.log('[SB] conductores cargados:',C.length, C.map(c=>c.id+':'+c.rut).slice(0,5));
 
   // Vehículos activos
-  const vehs=await sbGet('b_vehiculos','select=id,patente,tipo_vehiculo,estado&estado=eq.1');
+  const vehs=await sbGet('b_vehiculos','select=id,patente,tipo_vehiculo,estado&estado=eq.1&datos_completos->>transportista_id=eq.2&order=patente.asc');
   if(Array.isArray(vehs)){
     T.length=0; R.length=0;
     vehs.forEach(v=>{
