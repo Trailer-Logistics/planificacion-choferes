@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fleet Command — Trailer Logistics Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#0a0e1a;
@@ -164,7 +164,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   border-right:1px solid var(--border);
 }
 .hcell:last-child{border-right:none;}
-.day-n{font-family:var(--disp);font-size:20px;font-weight:800;color:#000;line-height:1.1;}
+.day-n{font-family:var(--disp);font-size:20px;font-weight:800;color:#ffffff;line-height:1.1;}
 .hcell.today{background:var(--blue-bg);}
 .hcell.today .day-n{color:var(--blue);}
 
@@ -382,7 +382,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .wev:hover{z-index:5;left:1px;filter:brightness(1.3);box-shadow:0 4px 20px rgba(0,0,0,.4);}
 .btn-blue{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;box-shadow:0 4px 16px rgba(37,99,235,.35);}
 .btn-blue:hover{background:linear-gradient(135deg,#60a5fa,#3b82f6);transform:translateY(-1px);}
-.mday:not(.today) .mdn{color:#000 !important;background:transparent;}
+.mday:not(.today) .mdn{color:#e8f0ff !important;background:transparent;}
 
 /* ═══ DESIGN SYSTEM ═══ */
 :root{
@@ -401,7 +401,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   --orange:#fb923c;--orange-bg:rgba(251,146,60,.1);
   --purple:#a78bfa;--purple-bg:rgba(167,139,250,.1);
   --text:#eef2ff;--text2:#7a96c2;--text3:#3d5478;
-  --font:'Outfit',sans-serif;--disp:'Syne',sans-serif;--mono:'DM Mono',monospace;
+  --font:'Inter',sans-serif;--disp:'Syne',sans-serif;--mono:'DM Mono',monospace;
 }
 /* ── BASE RESET ── */
 *{font-family:var(--font);}
@@ -469,18 +469,18 @@ body::before{
 
 /* ── CALENDAR HEADER ── */
 .cal-hrow{background:rgba(5,9,22,.9);border-bottom:1px solid var(--border);}
-.hcell{font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--text3);padding:11px 10px 9px;}
-.hcell.today{background:rgba(59,130,246,.05);}
-.day-n{font-family:var(--disp);font-weight:800;font-size:22px;color:#c8daff;letter-spacing:-.3px;line-height:1.1;margin-top:2px;}
+.hcell{font-size:10px;font-weight:700;letter-spacing:.8px;color:#6a85b0;padding:11px 10px 9px;}
+.hcell.today{background:rgba(59,130,246,.06);}
+.day-n{font-family:var(--disp);font-weight:900;font-size:22px;color:#ffffff;letter-spacing:-.3px;line-height:1.1;margin-top:2px;}
 .hcell.today .day-n{background:linear-gradient(135deg,#60a5fa,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 
 /* ── MONTH ── */
 .mgrid{background:rgba(4,8,20,.7);}
-.mday{background:rgba(6,10,24,.6);border-right:1px solid rgba(15,30,65,.8);border-bottom:1px solid rgba(15,30,65,.8);transition:background .14s;padding:10px 10px 8px;}
-.mday:hover{background:rgba(59,130,246,.04);}
-.mday.today{background:linear-gradient(160deg,rgba(59,130,246,.07),rgba(99,102,241,.04));box-shadow:inset 0 0 0 1px rgba(59,130,246,.18);}
-.mdn{font-family:var(--disp);font-weight:800;font-size:13px;color:#c8daff;display:inline-block;margin-bottom:4px;}
-.mday:not(.today) .mdn{color:#8fa8c8;}
+.mday{background:rgba(6,10,24,.55);border-right:1px solid rgba(20,35,80,.85);border-bottom:1px solid rgba(20,35,80,.85);transition:background .14s;padding:10px 10px 8px;}
+.mday:hover{background:rgba(59,130,246,.05);}
+.mday.today{background:linear-gradient(160deg,rgba(59,130,246,.08),rgba(99,102,241,.04));box-shadow:inset 0 0 0 1px rgba(59,130,246,.2);}
+.mdn{font-family:var(--font);font-weight:700;font-size:13px;color:#ffffff;display:inline-block;margin-bottom:4px;}
+.mday:not(.today) .mdn{color:#e8f0ff;}
 .mday.other .mdn{color:#2e4060;}
 .mday.today .mdn{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 0 14px rgba(59,130,246,.45);}
 .chip{border-radius:7px;font-size:10px;font-weight:600;line-height:1.4;padding:3px 8px 3px 6px;letter-spacing:.1px;}
